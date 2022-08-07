@@ -227,7 +227,7 @@ const handleSubmit = (event) => {
                     className="form-control"
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    pattern= {x}
+                    // pattern= {x}
                     autoComplete = "off"
                   />
                   {state.errors.fullName && (
