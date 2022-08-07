@@ -1,14 +1,11 @@
 import logo from './logo.svg';
 import './App.css';
-import ClassComponent from './Components/DemoComponent/ClassComponent';
-import FunctionComponent from './Components/DemoComponent/FunctionComponent';
 import Home from './Components/BaiTapLayout/Home';
 import DataBinding from './Components/DataBinding/DataBinding';
 import HandlingEvents from './Components/HandlingEvents/HandlingEvents';
 import RenderingWithConditions from './Components/RenderingWithConditions/RenderingWithConditions';
 import State from './Components/State/State';
 import Styling from './Components/Styling/Styling';
-import BaiTapXe from './Components/BaiTapXe/BaiTapXe';
 import RenderingWithMap from './Components/RenderingWithMap/RenderingWithMap';
 import ParentProps from './Components/Props/ParentProps';
 import BaiTapProps from './Components/BaiTapProps/BaiTapProps';
@@ -35,7 +32,6 @@ function App() {
       <hr />
       <Styling />
       <hr />
-      <BaiTapXe />
       <hr />
       <RenderingWithMap />
       <hr />

@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addUserAction, updateUserAction } from '../../Store/actions/user';
 
-var x = "^[a-zA-Z_ÀÁÂÃÈÉÊẾÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶ" + "ẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợ" + "ụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\\s]+$";
 const DEFAULT_VALUES = {
   id: '',
   username: '',
@@ -95,12 +94,22 @@ const handleBlur = (event) => {
       title,
       minLength,
       maxLength,
+      pattern,
+      value,
       //   validationMessage,
       validity: { valueMissing, patternMismatch, tooLong, tooShort },
     } = event.target;
     // const { valueMissing } = validity;
 
     let message = '';
+
+    if (pattern) {
+      const regex = new RegExp(pattern);
+      if(!regex.test(value))
+      {
+        message = `${title} is invalid pattern.`;
+      }
+    }
 
     if (patternMismatch) {
       message = `${title} is invalid pattern.`;
@@ -227,7 +236,7 @@ const handleSubmit = (event) => {
                     className="form-control"
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    // pattern= {x}
+                    pattern= "^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s\W|_]+$"
                     autoComplete = "off"
                   />
                   {state.errors.fullName && (
