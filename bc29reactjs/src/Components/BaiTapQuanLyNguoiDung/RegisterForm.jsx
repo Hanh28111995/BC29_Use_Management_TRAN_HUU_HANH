@@ -1,34 +1,68 @@
-import React, { Component } from 'react';
+import React, { Component, createRef, useState } from 'react';
+import { useEffect } from 'react';
 
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { addUserAction, updateUserAction } from '../../Store/actions/user';
 
-class RegisterForm extends Component {
-  // thuộc tính cấp ngoài cùng thì khi setState sẽ chỉ set lại thằng mới và giữ nguyên những thuộc tính cũ
-  // thuộc tính bên trong 1 cấp thì khi setState sẽ mất đi giá trị cũ mà chỉ set cái mới
-  state = {
-    values: {
-      id: '',
-      username: '',
-      fullName: '',
-      email: '',
-      password: '',
-      phoneNumber: '',
-      type: 'Client',
-    },
-    errors: {
-      id: '',
-      username: '',
-      fullName: '',
-      email: '',
-      password: '',
-      phoneNumber: '',
-      type: '',
-    },
-  };
+var x = "^[a-zA-Z_ÀÁÂÃÈÉÊẾÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶ" + "ẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợ" + "ụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\\s]+$";
+const DEFAULT_VALUES = {
+  id: '',
+  username: '',
+  fullName: '',
+  email: '',
+  password: '',
+  phoneNumber: '',
+  type: 'Client',
+};
+const DEFAULT_ERRORS = {
+  id: '',
+  username: '',
+  fullName: '',
+  email: '',
+  password: '',
+  phoneNumber: '',
+  type: 'Client',
+};
 
-  handleChange = (event) => {
+export default function RegisterForm() {
+
+  const [state, setState] = useState({
+    values: DEFAULT_VALUES,
+    errors: DEFAULT_ERRORS,
+  });
+  
+  const [valid, setValid] = useState({ isValid: true });
+
+  const {selectedUser} = useSelector((state)=> state.userReducer);
+
+  useEffect(() => {
+    if (selectedUser)
+    {
+      setState((prev_state)=>({
+        ...prev_state,
+        values: selectedUser,
+      }));
+    }
+  },[selectedUser]);
+
+
+const dispatch = useDispatch();
+
+const formRef = createRef();
+  // static getDerivedStateFromProps(nextProps, currentState) {
+  //   if (
+  //     nextProps.selectedUser &&
+  //     currentState.values.id !== nextProps.selectedUser.id
+  //   ) {
+  //     currentState.values = nextProps.selectedUser;
+  //   }
+
+  //   return currentState;
+  // }
+
+  const handleChange = (event) => {
     // if (event.target.name === 'username') {
-    //   this.setState({
+    //   setState({
     //     username: event.target.value,
     //   });
     // }
@@ -38,40 +72,24 @@ class RegisterForm extends Component {
     //     fullName: event.target.value,
     //   });
     // }
-
     const { name, value } = event.target;
 
-    this.setState({
+    setState({
       values: {
-        // giữ lại những giá trị cũ thông qua spread operator và thêm cái mới
-        ...this.state.values,
+        ...state.values,
         [name]: value,
       },
-    });
-
-    // console.log(event.target.name);
-    // console.log(event.target.value);
-  };
-
-  handleSubmit = (event) => {
-    event.preventDefault();
-
-    // duyệt object là for in
-    for (const key in this.state.errors) {
-      const message = this.state.errors[key];
-
-      if (message) {
-        return;
+      errors: {
+        ...state.errors,
       }
-    }
-
-    this.props.dispatch({
-      type: 'ADD_USER',
-      payload: this.state.values,
     });
+    if (formRef.current?.checkValidity()) {
+      setValid({
+        isValid: false,
+      })
+    }
   };
-
-  handleBlur = (event) => {
+const handleBlur = (event) => {
     const {
       name,
       title,
@@ -96,22 +114,81 @@ class RegisterForm extends Component {
       message = `${title} is required.`;
     }
 
-    this.setState({
+    setState({
+      values: {
+        ...state.values,
+      },
       errors: {
-        ...this.state.errors,
+        ...state.errors,
         [name]: message,
       },
     });
+    // if (!event.target.checkValidity()) {
+    //   setValid({
+    //     isValid: false,
+    //   })
+    // }
   };
 
-  render() {
+
+const handleSubmit = (event) => {
+    event.preventDefault();
+
+    // duyệt object là for in
+    // for (const key in this.state.errors) {
+    //   const message = this.state.errors[key];
+
+    //   if (message) {
+    //     return;
+    //   }
+    // }
+
+    if (!event.target.checkValidity()) {
+      return;
+    }
+    // if (this.props.selectedUser) {
+    //   this.props.dispatch({
+    //     type: 'UPDATE_USER',
+    //     payload: this.state.values,
+    //   });
+    // } else {
+    //   this.props.dispatch({
+    //     type: 'ADD_USER',
+    //     payload: this.state.values,
+    //   });
+    // }
+
+    // this.props.dispatch({
+    //   type: this.props.selectedUser ? 'UPDATE_USER' : 'ADD_USER',
+    //   payload: this.state.values,
+    // });
+
+    if (selectedUser) {
+      dispatch(updateUserAction(state.values));
+    } else {
+      dispatch(addUserAction(state.values));
+    }
+    setState(
+      {
+        values: DEFAULT_VALUES,
+        errors: DEFAULT_ERRORS,
+      }
+    );
+    setValid({
+      isValid: true,
+    })
+  };
+
+
+    const { username, fullName, password, email, phoneNumber, type } = state.values ;
+
     return (
       <div className="card p-0">
         <div className="card-header bg-warning text-white font-weight-bold">
           REGISTER FORM
         </div>
         <div className="card-body">
-          <form noValidate onSubmit={this.handleSubmit}>
+          <form ref={formRef} noValidate onSubmit={handleSubmit}>
             <div className="row">
               <div className="col-6">
                 <div className="form-group">
@@ -121,14 +198,17 @@ class RegisterForm extends Component {
                     required
                     type="text"
                     name="username"
+                    value={username}
                     className="form-control"
-                    // onChange={(event) =>  this.handleChange(event)}
-                    onChange={this.handleChange}
-                    onBlur={this.handleBlur}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    minLength = {5}
+                    maxLength = {10}
+                    autoComplete = "off" 
                   />
-                  {this.state.errors.username && (
+                  {state.errors.username && (
                     <span className="text-danger">
-                      {this.state.errors.username}
+                      {state.errors.username}
                     </span>
                   )}
                 </div>
@@ -139,17 +219,20 @@ class RegisterForm extends Component {
                   <input
                     title="Full name"
                     required
-                    minLength={4}
-                    maxLength={12}
+                    minLength={6}
+                    maxLength={20}
                     name="fullName"
+                    value={fullName}
                     type="text"
                     className="form-control"
-                    onChange={this.handleChange}
-                    onBlur={this.handleBlur}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    pattern= {x}
+                    autoComplete = "off"
                   />
-                  {this.state.errors.fullName && (
+                  {state.errors.fullName && (
                     <span className="text-danger">
-                      {this.state.errors.fullName}
+                      {state.errors.fullName}
                     </span>
                   )}
                 </div>
@@ -160,15 +243,19 @@ class RegisterForm extends Component {
                   <input
                     title="Password"
                     required
+                    minLength = {5}
+                    maxLength = {10}
+                    value={password}
                     name="password"
                     type="text"
                     className="form-control"
-                    onChange={this.handleChange}
-                    onBlur={this.handleBlur}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    autoComplete = "off"
                   />
-                  {this.state.errors.password && (
+                  {state.errors.password && (
                     <span className="text-danger">
-                      {this.state.errors.password}
+                      {state.errors.password}
                     </span>
                   )}
                 </div>
@@ -178,16 +265,19 @@ class RegisterForm extends Component {
                   <label>Phone Number</label>
                   <input
                     required
+                    value={phoneNumber}
                     title="Phone number"
                     name="phoneNumber"
                     type="text"
                     className="form-control"
-                    onChange={this.handleChange}
-                    onBlur={this.handleBlur}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    autoComplete = "off"
+                    pattern="[0-9]+"
                   />
-                  {this.state.errors.phoneNumber && (
+                  {state.errors.phoneNumber && (
                     <span className="text-danger">
-                      {this.state.errors.phoneNumber}
+                      {state.errors.phoneNumber}
                     </span>
                   )}
                 </div>
@@ -199,15 +289,17 @@ class RegisterForm extends Component {
                     required
                     name="email"
                     title="Email"
+                    value={email}
                     type="text"
                     pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+[.]{1}[a-zA-Z]{2,}$"
                     className="form-control"
-                    onChange={this.handleChange}
-                    onBlur={this.handleBlur}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    autoComplete = "off"
                   />
-                  {this.state.errors.email && (
+                  {state.errors.email && (
                     <span className="text-danger">
-                      {this.state.errors.email}
+                      {state.errors.email}
                     </span>
                   )}
                 </div>
@@ -217,10 +309,11 @@ class RegisterForm extends Component {
                   <label>Type</label>
                   <select
                     required
+                    value={type}
                     name="type"
                     className="form-control"
-                    onChange={this.handleChange}
-                    onBlur={this.handleBlur}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
                   >
                     <option>Client</option>
                     <option>Admin</option>
@@ -228,15 +321,29 @@ class RegisterForm extends Component {
                 </div>
               </div>
             </div>
-            <button className="btn btn-warning mr-2">SAVE</button>
-            <button type="reset" className="btn btn-outline-dark">
+            <button
+              disabled={valid.isValid}
+              className="btn btn-warning mr-2"
+            >
+              SAVE
+            </button>
+            <button
+            onClick={(e)=>{
+              setState({
+                values: DEFAULT_VALUES,
+                errors: DEFAULT_ERRORS,
+              })
+            }} 
+            type="reset" className="btn btn-outline-dark">
               RESET
             </button>
           </form>
         </div>
       </div>
     );
-  }
-}
+  };
+  
 
-export default connect()(RegisterForm);
+
+
+
